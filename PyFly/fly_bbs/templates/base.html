@@ -50,7 +50,14 @@
         <li class="layui-nav-item">
           <a href=""><span class="layui-badge">unread</span></a>
         </li> -->
-
+        {% if username %}
+          
+        <li class="layui-nav-item">
+          <a class="fly-nav-avatar" href="javascript:;">
+            <cite class="layui-hide-xs">{{ username }}</cite>
+          <a/>
+        <li/>      
+        {% else %}
           <li class="layui-nav-item">
             <a class="iconfont icon-touxiang layui-hide-xs" href="#"></a>
           </li>
@@ -60,6 +67,7 @@
           <li class="layui-nav-item">
             <a href="/user/register">注册</a>
           </li>
+        {% endif %}
     </ul>
   </div>
 </div>

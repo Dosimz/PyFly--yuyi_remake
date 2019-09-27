@@ -6,7 +6,8 @@ from fly_bbs.extensions import init_extensions
 
 def create_app(config_name):
     app = Flask(__name__)
-    #app.config['SECRET_KEY'] = 'PyFly123'
+    # 使用 seission 必须配置
+    app.config['SECRET_KEY'] = 'PyFly123'
     app.config.from_object(config[config_name])
     config_blueprint(app)
     init_extensions(app)

@@ -1,7 +1,10 @@
-from flask import Blueprint, render_template
+from flask import Blueprint, render_template, session
 
 bbs_index = Blueprint("index", __name__)
 
 @bbs_index.route('/')
 def index():
-    return render_template('base.html')
+    if 'username' in session:
+        username = session['username']
+        print(username)
+    return render_template('base.html', username=username)

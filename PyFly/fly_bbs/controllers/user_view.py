@@ -2,7 +2,7 @@ from fly_bbs.extensions import mongo
 import json
 import datetime
 from bson import ObjectId
-from flask import Blueprint, render_template, request, jsonify
+from flask import Blueprint, render_template, request, jsonify, session
 
 from fly_bbs.models import User
 
@@ -33,18 +33,16 @@ def login():
     #print(one_email)
 #    SUBMIT_METHODS = set(('POST','))
 #    print('登录成功了为什么不返回JSON???')
-    if bool(request) and request.method == 'POST':
-        print('登录成功了为什么不返回JSON???000000000000000')
+    if request.method == 'POST':
         email_form = request.form.get('email')
         pwd_form = request.form.get('password')
         user = mongo.db.users.find_one({'email': email_form})
-        print('登录成功了为什么不返回JSON???111111111111111111')
         if not user:
             return jsonify({'status': 50102, 'msg': '用户不存在'})
         if not User.validate_login(user['password'], pwd_form):
             return jsonify({'status': 'Error', 'msg': '密码错误'})
-        print('登录成功了为什么不返回JSON???2222222222222222')
-        return jsonify({'status': 200, 'msg': '登录成功了啊'})
+        session['username'] = user['username']
+        return '<h1>登录成功了啊<h1/>'
 
     return render_template('user/login.html')
 
