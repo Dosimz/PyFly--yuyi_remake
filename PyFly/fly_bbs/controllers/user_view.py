@@ -1,21 +1,14 @@
 from fly_bbs.extensions import mongo
 import json
-# import datetime
+from datetime import datetime
 # from bson import ObjectId
 from flask import Blueprint, render_template, request, jsonify, session, url_for, redirect
-
+from random import randint
 from fly_bbs.models import User
 from fly_bbs import utils, forms
+from werkzeug.security import generate_password_hash
 
 user_view = Blueprint('user', __name__)
-
-# @user_view.route('/')
-# def home():
-#     users = mongo.db.users.find()
-#     print(type(users))
-#     l = [i for i in users]
-#     print(l)
-#     return json.dumps(l, cls=JSONEncoder)
 
 
 @user_view.route('/login/', methods=['GET','POST'])
@@ -38,16 +31,36 @@ def login():
     ver_code = utils.gen_verify_num()
     return render_template('user/login.html', ver_code=ver_code['question'], form=user_form)
 
-@user_view.route('/register/')
+
+@user_view.route('/reg', methods=['GET', 'POST'])
 def register():
-    return render_template('user/reg.html')
+    # 是否开放注册
+    # if db_utils.get_option('open_user', {}).get('val') != '1':
+    #     abort(404)
+    user_form = forms.RegisterForm()
+    if user_form.is_submitted():
+        if not user_form.validate():
+            return jsonify({'status': 50001, 'msg': str(user_form.errors)})
+        utils.verify_num(user_form.vercode.data)
+        user = mongo.db.users.find_one({'email': user_form.email.data})
+        if user:
+            return jsonify({'status': 50000, 'msg': '用户已注册'})
+        user = dict({
+            'is_active': False,
+            'coin': 0,
+            'email': user_form.email.data,
+            'username': user_form.username.data,
+            'vip': 0,
+            'reply_count': 0,
+            'avatar': url_for('static', filename='images/avatar/' + str(randint(0, 12)) + '.jpg'),
+            'password': generate_password_hash(user_form.password.data),
+            'create_at': datetime.utcnow()
+        })
+        mongo.db.users.insert_one(user)
 
-
-# class JSONEncoder(json.JSONEncoder):
-#     def default(self, o):
-#         if isinstance(o, ObjectId):
-#             return str(o)
-#         elif isinstance(o, datetime.datetime):
-
-#             return o.isoformat()
-#         return json.JSONEncoder.default(self, o)
+        # send_active_email(user['username'], user['_id'], user['email'])
+        # return jsonify(code_msg.REGISTER_SUCCESS.put('action', url_for('user.login')))
+        return redirect(url_for('user.login'))
+    ver_code = utils.gen_verify_num()
+    # session['ver_code'] = ver_code['answer']
+    return render_template('user/reg.html', ver_code=ver_code['question'], form=user_form)
