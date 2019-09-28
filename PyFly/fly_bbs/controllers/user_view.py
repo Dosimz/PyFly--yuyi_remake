@@ -20,18 +20,6 @@ user_view = Blueprint('user', __name__)
 
 @user_view.route('/login/', methods=['GET','POST'])
 def login():
-    #l = request.values
-    #one_email = request.form.get('email')
-    #form = request.form
-    #res = request.get_json()
-    #files = request.files
-
-    #print(l)
-    #print(form)
-    #print(res)
-    #print(request.files)
-    #print(type(one_email), end='')
-    #print(one_email)
 #    SUBMIT_METHODS = set(('POST','))
 #    print('登录成功了为什么不返回JSON???')
     # if request.method == 'POST':
