@@ -5,7 +5,7 @@ import json
 from flask import Blueprint, render_template, request, jsonify, session, url_for, redirect
 
 from fly_bbs.models import User
-from fly_bbs import utils
+from fly_bbs import utils, forms
 
 user_view = Blueprint('user', __name__)
 
@@ -34,16 +34,20 @@ def login():
     #print(one_email)
 #    SUBMIT_METHODS = set(('POST','))
 #    print('登录成功了为什么不返回JSON???')
-    if request.method == 'POST':
-        email_form = request.form.get('email')
-        pwd_form = request.form.get('password')
-        vercode = request.form.get('vercode')
+    # if request.method == 'POST':
+    user_form = forms.LoginForm()
+    if user_form.is_submitted():
+        if not user_form.validate():
+            return jsonify({'status': 50001, 'msg': str(user_form.errors)})
+        email_form = user_form.email
+        pwd_form = user_form.password
+        vercode = user_form.vercode
         utils.verify_num(vercode)
         user = mongo.db.users.find_one({'email': email_form})
         if not user:
             return jsonify({'status': 50102, 'msg': '用户不存在'})
         if not User.validate_login(user['password'], pwd_form):
-            return jsonify({'status': 'Error', 'msg': '密码错误'})
+            return jsonify({'status': 50000, 'msg': '密码错误'})
         session['username'] = user['username']
         return redirect(url_for('index.index'))
     ver_code = utils.gen_verify_num()
