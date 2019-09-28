@@ -14,3 +14,12 @@ class LoginForm(FlaskForm):
     email = fields.StringField(validators=[DataRequired('邮箱不能为空')])
     vercode = fields.StringField(validators=[InputRequired('验证码错误')])
     password = fields.PasswordField(validators=[DataRequired('密码格式不对')])
+
+
+class PostsForm(FlaskForm):
+    id = fields.StringField()
+    title = fields.StringField(validators=[DataRequired('code_msg.POST_TITLE_EMPTY.get_msg()')])
+    content = fields.StringField(validators=[DataRequired('code_msg.POST_CONTENT_EMPTY.get_msg()')])
+    catalog_id = fields.StringField(validators=[DataRequired('code_msg.POST_CATALOG_EMPTY.get_msg()')])
+    reward = fields.IntegerField(validators=[InputRequired('code_msg.POST_COIN_EMPTY.get_msg()')])
+    vercode = fields.StringField(validators=[InputRequired('code_msg.VERIFY_CODE_ERROR.get_msg()')])

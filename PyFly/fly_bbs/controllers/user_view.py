@@ -32,7 +32,7 @@ def login():
     return render_template('user/login.html', ver_code=ver_code['question'], form=user_form)
 
 
-@user_view.route('/reg', methods=['GET', 'POST'])
+@user_view.route('/register', methods=['GET', 'POST'])
 def register():
     # 是否开放注册
     # if db_utils.get_option('open_user', {}).get('val') != '1':
