@@ -12,7 +12,7 @@ def index():
         username = session['username']
         print(username)
     else:
-        user = None
+        username = None
     return render_template('base.html', username=username)
 
 
