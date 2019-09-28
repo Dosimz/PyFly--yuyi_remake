@@ -36,7 +36,7 @@ def login():
         session['username'] = user['username']
         return redirect(url_for('index.index'))
     ver_code = utils.gen_verify_num()
-    return render_template('user/login.html', ver_code=ver_code['question'])
+    return render_template('user/login.html', ver_code=ver_code['question'], form=user_form)
 
 @user_view.route('/register/')
 def register():
