@@ -1,10 +1,11 @@
 from fly_bbs.extensions import mongo
 import json
-import datetime
-from bson import ObjectId
+# import datetime
+# from bson import ObjectId
 from flask import Blueprint, render_template, request, jsonify, session, url_for, redirect
 
 from fly_bbs.models import User
+from fly_bbs import utils
 
 user_view = Blueprint('user', __name__)
 
@@ -36,6 +37,8 @@ def login():
     if request.method == 'POST':
         email_form = request.form.get('email')
         pwd_form = request.form.get('password')
+        vercode = request.form.get('vercode')
+        utils.verify_num(vercode)
         user = mongo.db.users.find_one({'email': email_form})
         if not user:
             return jsonify({'status': 50102, 'msg': '用户不存在'})
@@ -43,8 +46,8 @@ def login():
             return jsonify({'status': 'Error', 'msg': '密码错误'})
         session['username'] = user['username']
         return redirect(url_for('index.index'))
-
-    return render_template('user/login.html')
+    ver_code = utils.gen_verify_num()
+    return render_template('user/login.html', ver_code=ver_code['question'])
 
 @user_view.route('/register/')
 def register():
