@@ -1,6 +1,6 @@
 from flask import Blueprint, render_template, session, jsonify, url_for, redirect
 from fly_bbs import forms, utils
-from bson import ObjectId
+from bson.objectid import ObjectId
 from datetime import datetime
 from fly_bbs.extensions import mongo
 
