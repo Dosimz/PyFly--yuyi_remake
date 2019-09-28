@@ -39,14 +39,11 @@ def login():
     if user_form.is_submitted():
         if not user_form.validate():
             return jsonify({'status': 50001, 'msg': str(user_form.errors)})
-        email_form = user_form.email
-        pwd_form = user_form.password
-        vercode = user_form.vercode
-        utils.verify_num(vercode)
-        user = mongo.db.users.find_one({'email': email_form})
+        utils.verify_num(user_form.vercode.data)
+        user = mongo.db.users.find_one({'email': user_form.email.data})
         if not user:
             return jsonify({'status': 50102, 'msg': '用户不存在'})
-        if not User.validate_login(user['password'], pwd_form):
+        if not User.validate_login(user['password'], user_form.password.data):
             return jsonify({'status': 50000, 'msg': '密码错误'})
         session['username'] = user['username']
         return redirect(url_for('index.index'))
