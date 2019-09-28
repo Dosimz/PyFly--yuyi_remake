@@ -7,4 +7,6 @@ def index():
     if 'username' in session:
         username = session['username']
         print(username)
+    else:
+        user = None
     return render_template('base.html', username=username)

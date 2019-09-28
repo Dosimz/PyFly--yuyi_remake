@@ -2,7 +2,7 @@ from fly_bbs.extensions import mongo
 import json
 import datetime
 from bson import ObjectId
-from flask import Blueprint, render_template, request, jsonify, session
+from flask import Blueprint, render_template, request, jsonify, session, url_for, redirect
 
 from fly_bbs.models import User
 
@@ -42,7 +42,7 @@ def login():
         if not User.validate_login(user['password'], pwd_form):
             return jsonify({'status': 'Error', 'msg': '密码错误'})
         session['username'] = user['username']
-        return '<h1>登录成功了啊<h1/>'
+        return redirect(url_for('index.index'))
 
     return render_template('user/login.html')
 
