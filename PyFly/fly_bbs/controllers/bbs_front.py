@@ -40,8 +40,8 @@ def add(post_id=None):
             'content': posts_form.content.data,
         }
 
-        post_index = posts.copy()
-        post_index['catalog_id'] = str(posts['catalog_id'])
+        # post_index = posts.copy()
+        # post_index['catalog_id'] = str(posts['catalog_id'])
 
         msg = '发帖成功！'
         # reward = posts_form.reward.data

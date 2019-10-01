@@ -19,9 +19,9 @@
                     <div class="layui-input-block">
                       <select lay-verify="required" name="catalog_id" {{ 'disabled' if post.is_closed }}>
                         <option></option>
-                {#      {% for item in get_list('catalogs') %}
+                        {% for item in get_list('catalogs') %}
                           <option value="{{ item._id }}" {{ 'selected' if post and post['catalog_id'] == item._id }}>{{ item.name }}</option>
-                        {% endfor %} 还没有建立这个 clloctions #}
+                        {% endfor %}
                       </select>
                     </div>
                   </div>
