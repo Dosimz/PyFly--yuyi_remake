@@ -10,42 +10,42 @@ def init():
 
     options = [
         {
-            'name': 'WebTitle',
+            'name': '网站标题',
             'code': 'title',
             'val': 'PyFly'
         },
         {
-            'name': 'WebDST',
+            'name': '网站描述',
             'code': 'desciption',
             'val': 'PyFly'
         },
         {
-            'name': 'WebKeywords',
+            'name': '网站关键字',
             'code': 'keywords',
             'val': 'PyFly'
         },
         {
-            'name': 'WebLogo',
+            'name': '网站Logo',
             'code': 'logo',
             'val': '/static/images/logo.png'
         },
         {
-            'name': 'Attendance(1-100)',
+            'name': '签到奖励(格式：1-100)',
             'code': 'sign_interval',
             'val': '1-100'
         },
         {
-            'name': 'BeginRegister(0:close; 1:open)',
+            'name': '开启用户注册(0: 开启; 1: 关闭)',
             'code': 'open_user',
             'val': '1'
         },
         {
-            'name': 'AdministongerEmail',
+            'name': '管理员邮箱（申请友链链接用到）',
             'code': 'email',
             'val': '981764793@qq.com'
         },
         {
-            'name': 'BottomMessages(support Html)',
+            'name': '底部消息(支持html代码)',
             'code': 'footer',
             'val': 'Power by PyFly'
         },
@@ -65,6 +65,9 @@ def init():
         'is_active': True,
         'create_at': datetime.utcnow(),
         })
+
+    catalogs = [{'name': '游戏'}, {'name': '音乐'}, {'name': '科技'}, {'name': '影视'}]
+    mongo.db.catalogs.insert_many(catalogs)
 
     if len(result.inserted_ids) > 0:
         with open(lock_file, 'w') as file:

@@ -10,11 +10,11 @@
         {% endfor %}
 
         <li class="layui-hide-xs layui-hide-sm layui-show-md-inline-block"><span class="fly-mid"></span></li>
-        {% if current_user.is_authenticated %}
-          <li class="layui-hide-xs layui-hide-sm layui-show-md-inline-block"><a href="{{ url_for('user.user_posts') }}">我发表的贴</a></li>
+      {% if current_user.is_authenticated %}
+          <li class="layui-hide-xs layui-hide-sm layui-show-md-inline-block"><a href="#">我发表的贴</a></li>
           <li class="layui-hide-xs layui-hide-sm layui-show-md-inline-block"><a
-                  href="{{ url_for('user.user_posts') + '#collection' }}">我收藏的贴</a></li>
-        {% endif %}
+                  href="#">我收藏的贴</a></li>
+      {% endif %}
 
       </ul>
 
@@ -38,20 +38,21 @@
 
         {% if is_index %}
           <div class="fly-panel">
-            <h3 class="fly-panel-title">温馨通道</h3>
+            <h3 class="fly-panel-title">温馨通道(暂无内容))</h3>
             <ul class="fly-panel-main fly-list-static">
-              {% for item in get_list('passageways', sort_by=('sort', -1)) %}
+            {#  {% for item in get_list('passageways', sort_by=('sort', -1)) %}
                 <li>
                 <a href="{{ item.url }}" target="_blank">{{ item.name }}</a>
               </li>
               {% endfor %}
+            #}
             </ul>
           </div>
 
-            {% if current_user.is_authenticated %}
+          {% if current_user.is_authenticated %}
                 <div class="fly-panel fly-signin">
                     <div class="fly-panel-title">
-                        签到
+                        签到(暂未实现)
                         <i class="fly-mid"></i>
                         <a href="javascript:;" class="fly-link" id="LAY_signinHelp">说明</a>
                     </div>
@@ -59,7 +60,7 @@
 
                     </div>
                 </div>
-            {% endif %}
+          {% endif %}
 
 
           <div class="fly-panel fly-rank fly-rank-reply" id="LAY_replyRank">
@@ -82,7 +83,7 @@
 
         <dl class="fly-panel fly-list-one">
           <dt class="fly-panel-title">本周热议</dt>
-          {% for item in get_list('posts', sort_by=('comment_count',-1), size=10, filter1={'create_at':{'$gte': date_cal(now(), 7, False)}}) %}
+          {% for item in get_list('posts', sort_by=('comment_count',-1), size=10, filter1={'create_at':{'$gte': date_cal(7, False)}}) %}
             <dd>
               <a href="/post/{{ item._id }}">{{ item.title }}</a>
               <span><i class="iconfont icon-pinglun1"></i> {{ item.get('comment_count', 0) }}</span>

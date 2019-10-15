@@ -2,8 +2,10 @@
 <html>
 <head>
 <meta charset="utf-8">
-<title>首页</title>
+<title>{{ title or '首页' }}-{{ get_option('title').val or 'PyFly' }}</title>
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+<meta name="keywords" content="{{ get_option('keywords').val }}">
+<meta name="description" content="{{ get_option('description').val }}">
 <link rel="stylesheet" href="/static/layui/css/layui.css">
 <link rel="stylesheet" href="/static/css/global.css">
 {% block other_res %}
@@ -14,59 +16,63 @@
 <div class="fly-header layui-bg-black">
   <div class="layui-container">
     <a class="fly-logo" href="/">
-      <img src="/static/images/logo.png" alt="layui">
+      <img src="{{ get_option('logo').val or '/static/images/logo.png' }}" alt="layui">
     </a>
+
     <ul class="layui-nav fly-nav layui-hide-xs">
+      {% for item in get_list('pages', sort_by=('sort', -1)) %}
         <li class="layui-nav-item layui-this">
-          <a href="#">交流<i class="layui-icon"></i>  </a>
+          <a href="{{ item.url }}">{{ item.name }} <i class="layui-icon">{{ item.icon_code|safe }}</i>  </a>
         </li>
-        <li class="layui-nav-item layui-this">
-          <a href="#">白度<i class="layui-icon"></i>  </a>
-        </li>
+      {% endfor %}
     </ul>
 
     <ul class="layui-nav fly-nav-user">
-        <!-- <li class="layui-nav-item">
+        
+<!-- 表示 User 对象 -->
+      
+      {% if current_user.is_authenticated %}
+        <li class="layui-nav-item">
           <a class="fly-nav-avatar" href="javascript:;">
-
-              <cite class="layui-hide-xs">予以</cite>
-              <i class="iconfont icon-renzheng" title=" 超级无敌大牛标志 "></i>
-
-              <i class="layui-badge fly-badge-vip">VIP 疼逊炒鸡会员 </i>
-            
-            <img src="/static/images/11.jpg">
+            <cite class="layui-hide-xs">{{ current_user.user.username }}</cite>
+            {% if current_user.user.renzheng %}
+              <i class="iconfont icon-renzheng" title="{{ current_user.user.renzheng }}"></i>
+            {% endif %}
+            {% if current_user.user.get('vip', 0) > 0 %}
+              <i class="layui-badge fly-badge-vip">VIP{{ current_user.user.vip }}</i>
+            {% endif %}
+            <img src="{{ current_user.user.avatar }}">
           </a>
-
           <dl class="layui-nav-child">
-            <dd><a href="#"><i class="layui-icon">&#xe620;</i>基本设置</a></dd>
-            <dd><a href="#"><i class="iconfont icon-tongzhi" style="top: 4px;"></i>我的消息</a></dd>
-            <dd><a href="#"><i class="layui-icon" style="margin-left: 2px; font-size: 22px;">&#xe68e;</i>我的主页</a>
-            </dd>
+            {#<dd><a href="{{ url_for('user.user_set') }}"><i class="layui-icon">&#xe620;</i>基本设置</a></dd>}
+            <dd><a href="{{ url_for('user.user_message') }}"><i class="iconfont icon-tongzhi" style="top: 4px;"></i>我的消息</a></dd>
+            <dd><a href="{{ url_for('user.user_home', user_id=current_user.user._id) }}"><i class="layui-icon" style="margin-left: 2px; font-size: 22px;">&#xe68e;</i>我的主页</a>
+            </dd>#}
             <hr style="margin: 5px 0;">
-            <dd><a href="#" style="text-align: center;">退出</a></dd>
+            <dd><a href="{{ url_for('user.logout') }}" style="text-align: center;">退出</a></dd>
           </dl>
         </li>
-        
-        <li class="layui-nav-item">
-          <a href=""><span class="layui-badge">unread</span></a>
-        </li> -->
-        {% if username %}
-        <li class="layui-nav-item">  
-          <a class="fly-nav-avatar" href="javascript:;">
-          <cite class="layui-hide-xs">{{ username }}</cite>
-          <a/>
+        {% if current_user.user.get('unread', 0) > 0 %}
+          <li class="layui-nav-item">
+          {#<a href="{{ url_for('user.user_message') }}"><span class="layui-badge">{{ current_user.user.unread }}</span></a>#}
         </li>
-        {% else %}
-          <li class="layui-nav-item">
-            <a class="iconfont icon-touxiang layui-hide-xs" href="#"></a>
-          </li>
-          <li class="layui-nav-item">
-            <a href="/user/login">登录</a>
-          </li>
-          <li class="layui-nav-item">
-            <a href="/user/register">注册</a>
-          </li>
         {% endif %}
+
+      {% else %}
+           <!-- 开启用户注册 -->
+           {% if get_option('open_user').val == '1' %}
+           <li class="layui-nav-item">
+             <a class="iconfont icon-touxiang layui-hide-xs" href="{{ url_for('user.login') }}"></a>
+           </li>
+           <li class="layui-nav-item">
+             <a href="{{ url_for('user.login') }}">登入</a>
+           </li>
+           <li class="layui-nav-item">
+             <a href="{{ url_for('user.register') }}">注册</a>
+           </li>
+          {% endif %}
+
+      {% endif %}
     </ul>
   </div>
 </div>
@@ -76,13 +82,22 @@
 
 
 <div class="fly-footer">
-  <p>Power by PyFly</p>
+  <p>{{ get_option('footer').val|safe or 'Power by PyFly' }}</p>
   <p>
-    2019/9/27
+    {% for item in get_list('footer_links', sort_by=('sort', -1)) %}
+      <a href="{{ item.url }}" target="_blank">{{ item.name }}</a>
+    {% endfor %}
   </p>
 </div>
 
 <script src="/static/layui/layui.js"></script>
+<script>
+  layui.use('element', function(){
+  var element = layui.element;
+  
+  //…
+});
+</script>
 
 {% block other_js %}
 {% endblock %}

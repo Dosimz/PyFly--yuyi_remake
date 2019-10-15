@@ -4,10 +4,10 @@ from datetime import datetime
 # from bson import ObjectId
 from flask import Blueprint, render_template, request, jsonify, session, url_for, redirect
 from random import randint
-from fly_bbs.models import User
+from fly_bbs import models
 from fly_bbs import utils, forms
 from werkzeug.security import generate_password_hash
-
+from flask_login import login_user, logout_user, AnonymousUserMixin
 user_view = Blueprint('user', __name__)
 
 
@@ -24,10 +24,16 @@ def login():
         user = mongo.db.users.find_one({'email': user_form.email.data})
         if not user:
             return jsonify({'status': 50102, 'msg': '用户不存在'})
-        if not User.validate_login(user['password'], user_form.password.data):
+        if not models.User.validate_login(user['password'], user_form.password.data):
             return jsonify({'status': 50000, 'msg': '密码错误'})
-        session['username'] = user['username']
+        if not user.get('is_active', False):
+            return jsonify({'status': 403, 'msg': '账号还未激活'})
+        # session['username'] = user['username']
+        print(user['is_active'])
+        login_user(models.User(user))
+        # login_user(user)
         return redirect(url_for('index.index'))
+    logout_user()
     ver_code = utils.gen_verify_num()
     return render_template('user/login.html', ver_code=ver_code['question'], form=user_form)
 
@@ -46,7 +52,7 @@ def register():
         if user:
             return jsonify({'status': 50000, 'msg': '用户已注册'})
         user = dict({
-            'is_active': False,
+            'is_active': True,
             'coin': 0,
             'email': user_form.email.data,
             'username': user_form.username.data,
@@ -64,3 +70,16 @@ def register():
     ver_code = utils.gen_verify_num()
     # session['ver_code'] = ver_code['answer']
     return render_template('user/reg.html', ver_code=ver_code['question'], form=user_form)
+
+
+# 用户 index 页面
+@user_view.route('/posts')
+# @login_required
+def user_posts():
+    return render_template('user/index.html', user_page='posts', page_name='user')
+
+
+@user_view.route('/logout')
+def logout():
+    logout_user()
+    return redirect(url_for('index.index'))

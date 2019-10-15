@@ -48,7 +48,7 @@
                         {% for i in range(0, 101, 20) %}
                           <option value="{{ i }}" {{ 'selected' if post and post['reward'] == i }}>{{ i }}</option>
                         {% endfor %}
-
+                        <input type="hidden" name="reward" value="{{ post['reward'] }}">
                       </select>
                     </div>
                     <div class="layui-form-mid layui-word-aux">发表后无法更改悬赏数目</div>
@@ -78,6 +78,12 @@
 
 
 {% block other_js %}
+  <script>
+    layui.use('form', function(){
+    var form = layui.form(); 
+    form.render();
+    });
+  </script>
   {% if post['is_closed'] %}
     <script>
         layui.use('layer', function () {
