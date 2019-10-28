@@ -16,3 +16,12 @@ class RegisterForm(FlaskForm):
     vercode = fields.StringField(validators=[InputRequired('验证码错误')])
     password = fields.PasswordField(validators=[Length(min=6, max=16, message='密码长度应该在6～16之间')])
     re_password = fields.PasswordField(validators=[EqualTo('password', '两次输入的密码不一样')])
+
+
+class PostsForm(FlaskForm):
+    id = fields.StringField()
+    title = fields.StringField(validators=[DataRequired('帖子标题不能为空')])
+    content = fields.StringField(validators=[DataRequired('帖子内容不能为空')])
+    catalog_id = fields.StringField(validators=[DataRequired('帖子种类不能为空')])
+    reward = fields.IntegerField(validators=[InputRequired('帖子悬赏不能不选')])
+    vercode = fields.StringField(validators=[InputRequired('验证码不能为空')])
