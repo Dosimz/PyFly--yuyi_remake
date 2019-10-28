@@ -1,4 +1,14 @@
+# ?? __init__.py ??
+from .bbs_front import bbs_index
 from .user_view import user_view
 
+# ?????????????????
+DEFAULT_BLUEPRINT = (
+        (bbs_index, ''),
+        (user_view, '/user')
+)
+
+# ???????????????
 def config_blueprint(app):
-    app.register_blueprint(user_view, url_prefix='/user')
+    for blueprint, url_prefix in DEFAULT_BLUEPRINT:
+        app.register_blueprint(blueprint, url_prefix=url_prefix)

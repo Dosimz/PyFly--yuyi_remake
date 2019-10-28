@@ -6,6 +6,8 @@ from fly_bbs.install_init import init as install_init
 
 def create_app(config_name):
     app = Flask(__name__)
+    app.config['SECRET_KEY'] = 'PyFLy123'
+
     app.config.from_object(config[config_name])
     config_blueprint(app)
     init_extensions(app)
