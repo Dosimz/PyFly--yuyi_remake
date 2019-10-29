@@ -11,46 +11,6 @@ from flask_login import login_user, logout_user, login_required, current_user
 user_view = Blueprint('user', __name__)
 
 
-@user_view.route('/forget', methods=['POST', 'GET'])
-@user_view.route('/forget/<ObjectId:code>', methods=['POST', 'GET'])
-def user_pass_forget(code=None):
-    # if request.method == 'POST':
-    mail_form = forms.SendForgetMailForm()
-    if mail_form.is_submitted():
-        # print('----')
-        if not mail_form.validate():
-            return jsonify(models.R.fail(code_msg.PARAM_ERROR.get_msg(), str(mail_form.errors)))
-        email = mail_form.email.data
-        ver_code = mail_form.vercode.data
-        utils.verify_num(ver_code)
-        #  拿到用户
-        user = mongo.db.users.find_one({'email': email})
-        # 用户不存在
-        if not user:
-            return jsonify(code_msg.USER_NOT_EXIST)
-        # 发送忘记密码邮件
-        send_active_email(user['username'], user_id=user['_id'], email=email, is_forget=True)
-        return jsonify(code_msg.RE_PWD_MAIL_SEND.put('action', url_for('user.login')))
-    has_code = False
-    user = None
-    # 用户点击重置密码链接访问时
-    if code:
-        # send_active_email 中会生成
-        active_code = mongo.db.active_codes.find_one({'_id': code})
-        has_code = True
-        # 发了忘记密码邮件，密码已修改，重置连接失效
-        if not active_code:
-            return render_template('user/forget.html', page_name='user', has_code=True, code_invalid=True)
-        # 拿到用户
-        user = mongo.db.users.find_one({'_id': active_code['user_id']})
-
-    ver_code = utils.gen_verify_num()
-    print(ver_code['answer'])
-    # session['ver_code'] = ver_code['answer']
-    return render_template('user/forget.html', page_name='user', ver_code=ver_code['question']
-                           , code=code, has_code=has_code, user=user)
-
-
 # 忘记密码
 @user_view.route('/forget', methods=['POST', 'GET'])
 def user_pass_forget():
@@ -124,7 +84,7 @@ def send_active_email(username, user_id, email, is_forget=False):
                            url=url_for('user.user_active', code=code.inserted_id, _external=True))
     utils.send_email(email, '账号激活', body=body)
 
-密码重置
+# 密码重置
 @user_view.route('/repass', methods=['POST'])
 def user_repass():
     # 未登录用户跳转到登录页面

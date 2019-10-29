@@ -1,11 +1,13 @@
 from flask import Blueprint, render_template,flash, request, url_for, current_app, session, jsonify, abort, redirect
 from fly_bbs import db_utils, utils, forms, models, code_msg
-from fly_bbs.extensions import mongo
+from fly_bbs.extensions import mongo, whoosh_searcher
 from flask_login import login_required
 from flask_login import current_user
 from bson.objectid import ObjectId
 import pymongo
 from datetime import datetime
+from whoosh import query,sorting, qparser
+
 
 bbs_index = Blueprint("index", __name__)
 
@@ -123,7 +125,8 @@ def jump_comment(comment_id):
 
 @bbs_index.route('/refresh/indexes')
 def refresh_indexes():
-    name = request.values.get('name')
+    # name = request.values.get('name')
+    name = 'posts'
     # 清除索引
     whoosh_searcher.clear(name)
     # 获取 IndexWriter 对象

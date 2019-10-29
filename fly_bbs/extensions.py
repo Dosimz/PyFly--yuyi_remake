@@ -9,6 +9,7 @@ from fly_bbs.admin import admin_view
 from flask_mail import Mail
 
 from fly_bbs.plugins import WhooshSearcher
+from whoosh.fields import Schema, TEXT, ID, DATETIME
 
 whoosh_searcher = WhooshSearcher()
 from jieba.analyse import ChineseAnalyzer
