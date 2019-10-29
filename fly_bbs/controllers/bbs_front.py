@@ -10,12 +10,32 @@ from datetime import datetime
 bbs_index = Blueprint("index", __name__)
 
 @bbs_index.route('/')
-def index():
-    if 'username' in session:
-        username = session['username']
-    else:
-        username = None
-    return render_template('base.html', username=username)
+@bbs_index.route('/page/<int:pn>/size/<int:size>')
+@bbs_index.route('/page/<int:pn>')
+@bbs_index.route("/catalog/<ObjectId:catalog_id>")
+@bbs_index.route("/catalog/<ObjectId:catalog_id>/page/<int:pn>")
+@bbs_index.route("/catalog/<ObjectId:catalog_id>/page/<int:pn>/size/<int:size>")
+
+def index(pn=1, size=10, catalog_id=None):
+
+    sort_key = request.values.get('sort_key', '_id')
+    # 传入要排序的字段和升降序的标志
+    sort_by = (sort_key, pymongo.DESCENDING)
+    # 帖子状态
+    post_type = request.values.get('type')
+    filter1 = {}
+    if post_type == 'not_closed':
+        filter1['is_closed'] = {'$ne': True}
+    if post_type == 'is_closed':
+        filter1['is_closed'] = True
+    if post_type == 'is_cream':
+        filter1['is_cream'] = True
+    # 帖子种类
+    if catalog_id:
+        filter1['catalog_id'] = catalog_id
+    page = db_utils.get_page('posts', pn=pn, filter1=filter1, size=size, sort_by=sort_by)
+    # print(page)
+    return render_template("post_list.html", is_index=catalog_id is None, page=page, sort_key=sort_key, catalog_id=catalog_id, post_type=post_type)
 
 
 @bbs_index.route('/add', methods=['GET', 'POST'])

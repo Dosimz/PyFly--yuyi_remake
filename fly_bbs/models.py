@@ -52,3 +52,27 @@ class BaseResult(R):
         self.put('status', code)
         self.put('msg', msg)
         self.put('data', data)
+
+
+from json import JSONEncoder
+
+class Page:
+    def __init__(self, pn, size, sort_by=None, filter1=None, result=None, has_more=False, total_page=0, total=0):
+        self.pn = pn
+        self.size = size
+        self.sort_by = sort_by
+        self.result = result
+        self.filter1 = filter1
+        self.has_more = has_more
+        self.total_page = total_page
+        self.total=total
+
+    def __repr__(self):
+        return JSONEncoder().encode(o = self.__dict__)
+
+
+
+class GlobalApiException(Exception):
+
+    def __init__(self, cm):
+        self.code_msg = cm
