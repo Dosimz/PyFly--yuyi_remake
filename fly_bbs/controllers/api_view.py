@@ -12,6 +12,44 @@ from fly_bbs.extensions import upload_photos
 
 api_view = Blueprint("api", __name__, url_prefix="", template_folder="templates")
 
+@api_view.route('/sign/status', methods=['POST'])
+@login_required
+def sign_status():
+    user = current_user.user
+    # 查询数据库中用户今天是否已经记录过签到信息
+    sign_log = mongo.db['user_signs'].find_one({'user_id': user['_id'], 'date': datetime.utcnow().strftime('%Y-%m-%d')})
+    signed = False
+    coin = 0
+    if sign_log:
+        signed = True
+        coin = sign_log.get('coin', 0)
+
+    return jsonify(models.R.ok(data={'signed': signed, 'coin': coin}))
+
+
+@api_view.route('/sign', methods=['POST'])
+@login_required
+def user_sign():
+    date = datetime.utcnow().strftime('%Y-%m-%d')
+    user = current_user.user
+    doc = {
+        'user_id': user['_id'],
+        'date': date
+    }
+    # 如果用户今天已经签过到，返回相关信息
+    sign_log = mongo.db['user_signs'].find_one(doc)
+    if sign_log:
+        return jsonify(code_msg.REPEAT_SIGNED)
+    # 随机奖励
+    interval = db_utils.get_option('sign_interval', {'val': '1-100'})['val'].split('-')
+    coin = random.randint(int(interval[0]), int(interval[1]))
+    doc['coin'] = coin
+    # print(coin)
+    # 插入签到记录
+    mongo.db['user_signs'].insert_one(doc)
+    # 更新金币数量
+    mongo.db.users.update({'_id': user['_id']}, {"$inc": {'coin': coin}})
+    return jsonify(models.R.ok(data={'signed': True, 'coin': coin}))
 
 
 @api_view.route('/upload/<string:name>')
