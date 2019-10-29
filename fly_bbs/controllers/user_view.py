@@ -6,9 +6,18 @@ from bson import ObjectId
 from fly_bbs import utils,forms, models, db_utils, code_msg
 from flask import Blueprint, render_template, request, jsonify, session, url_for, redirect
 from fly_bbs import models
-from flask_login import login_user,logout_user
+from flask_login import login_user, logout_user, login_required
 
 user_view = Blueprint('user', __name__)
+
+
+# 用户 home 界面
+@user_view.route('/<ObjectId:user_id>')
+@login_required
+def user_home(user_id):
+    # 在数据库 user 集合中查找主键为 user_id 的数据
+    user = mongo.db.users.find_one_or_404({'_id': user_id})
+    return render_template('user/home.html', user=user)
 
 
 @user_view.route('/login/', methods=['GET','POST'])
