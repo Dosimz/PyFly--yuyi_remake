@@ -23,6 +23,8 @@ class Dev:
     MAIL_DEBUG = True
     MAIL_SUBJECT_PREFIX = '[PyFly]-'
 
+        WHOOSH_PATH = os.path.join(os.getcwd(), 'whoosh_indexes')
+
 
 class Prod:
     pass

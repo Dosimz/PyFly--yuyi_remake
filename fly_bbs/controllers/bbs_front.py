@@ -119,3 +119,40 @@ def jump_comment(comment_id):
             pn += 1
     return redirect(url_for('index.post_detail', post_id=post_id, pn=pn) + '#item-' + str(comment_id))
 
+
+
+@bbs_index.route('/refresh/indexes')
+def refresh_indexes():
+    name = request.values.get('name')
+    # 清除索引
+    whoosh_searcher.clear(name)
+    # 获取 IndexWriter 对象
+    writer = whoosh_searcher.get_writer(name)
+    for item in mongo.db[name].find({}, ['_id', 'title', 'content', 'create_at', 'user_id', 'catalog_id']):
+        item['obj_id'] = str(item['_id'])
+        item['user_id'] = str(item['user_id'])
+        item['catalog_id'] = str(item['catalog_id'])
+        item.pop('_id')
+        writer.add_document(**item)
+    # 保存修改
+    writer.commit()
+    return ''
+
+
+@bbs_index.route('/search')
+@bbs_index.route('/search/page/<int:pn>/')
+def post_search(pn=1, size=10):
+    keyword = request.values.get('kw')
+    if keyword is None:
+        return render_template('search/list.html', title='搜索', message='搜索关键字不能为空!')
+    with whoosh_searcher.get_searcher('posts') as searcher:
+        # 解析查询字符串
+        parser = qparser.MultifieldParser(['title', 'content'], whoosh_searcher.get_index('posts').schema)
+        q = parser.parse(keyword)
+        # 搜索得到结果
+        result = searcher.search_page(q, pagenum=pn, pagelen=size, sortedby=sorting.ScoreFacet())
+        result_list = [x.fields() for x in result.results]
+        # 构建页面对象
+        page = models.Page(pn, size, result=result_list, has_more=result.pagecount > pn, total_page=result.pagecount
+                           , total=result.total)
+    return render_template('search/list.html', title=keyword + '搜索结果', page=page, kw=keyword)

@@ -8,6 +8,11 @@ from flask_admin import Admin
 from fly_bbs.admin import admin_view
 from flask_mail import Mail
 
+from fly_bbs.plugins import WhooshSearcher
+
+whoosh_searcher = WhooshSearcher()
+from jieba.analyse import ChineseAnalyzer
+
 admin = Admin(name='PyFly 后台管理系统')
 
 mail = Mail()
@@ -38,6 +43,8 @@ def init_extensions(app):
     # 将 admin 对象注册到 app 上
     admin.init_app(app)
 
+    whoosh_searcher.init_app(app)
+
     with app.app_context():
         # 添加flask-admin视图
         admin.add_view(admin_view.UsersModelView(mongo.db['users'], '用户管理'))
@@ -49,3 +56,11 @@ def init_extensions(app):
         admin.add_view(admin_view.FooterLinksModelView(mongo.db['footer_links'], '底部链接', category='推广管理'))
         admin.add_view(admin_view.AdsModelView(mongo.db['ads'], '广告管理', category='推广管理'))
         admin.add_view(admin_view.OptionsModelView(mongo.db['options'], '系统设置'))
+
+        # 使用 jieba 中文分词
+        chinese_analyzer = ChineseAnalyzer()
+        # 建立索引模式对象
+        post_schema = Schema(obj_id=ID(unique=True, stored=True), title=TEXT(stored=True, analyzer=chinese_analyzer)
+                                , content=TEXT(stored=True, analyzer=chinese_analyzer), create_at=DATETIME(stored=True)
+                                , catalog_id=ID(stored=True), user_id=ID(stored=True))
+        whoosh_searcher.add_index('posts', post_schema)
