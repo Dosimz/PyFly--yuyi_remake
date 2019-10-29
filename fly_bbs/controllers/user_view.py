@@ -11,6 +11,47 @@ from flask_login import login_user, logout_user, login_required, current_user
 user_view = Blueprint('user', __name__)
 
 
+@user_view.route('/active', methods=['GET', 'POST'])
+def user_active():
+    if request.method == 'GET':
+        code = request.values.get('code')
+        if code:
+            user_id = mongo.db.active_codes.find_one({'_id': ObjectId(code)})['user_id']
+            # 可以激活账户了
+            if user_id:
+                # 通过激活验证后，删掉 user_id 关联的 active_codes 
+                mongo.db.active_codes.delete_many({'user_id': ObjectId(user_id)})
+                # 激活账户
+                mongo.db.users.update({'_id': user_id}, {"$set": {'is_active': True}})
+                # 根据 user_id 在数据库中取到用户对象
+                user = mongo.db.users.find_one({'_id': ObjectId(user_id)})
+                # 登录
+                login_user(models.User(user))
+                return render_template('user/activate.html')
+        # 如果没有登录,显示错误
+        if not current_user.is_authenticated:
+            abort(403)
+        return render_template('user/activate.html')
+
+    if not current_user.is_authenticated:
+        abort(403)
+    user = current_user.user
+    # 删除
+    mongo.db.active_codes.delete_many({'user_id': ObjectId(user['_id'])})
+    # 发送邮件
+    send_active_email(user['username'], user['_id'], user['email'])
+    return jsonify(code_msg.RE_ACTIVATE_MAIL_SEND.put('action', url_for('user.active')))
+
+
+def send_active_email(username, user_id, email, is_forget=False):
+    code = mongo.db.active_codes.insert_one({'user_id': user_id})
+    # 激活邮件内容
+    body = render_template('email/user_active.html', username=username,
+                           url=url_for('user.user_active', code=code.inserted_id, _external=True))
+    # 发送邮件
+    utils.send_email(email, '账号激活', body=body)
+
+
 @user_view.route('/repass', methods=['POST'])
 def user_repass():
     # 未登录用户跳转到登录页面
@@ -139,6 +180,8 @@ def register():
             'create_at': datetime.utcnow()
         })
         mongo.db.users.insert_one(user)
+        # 每次在数据库添加完注册账户信息后，我们就发一封邮件高兴一下
+        # utils.send_email(user_form.email.data, '你激活了', body='你已经成功注册了账号，同时完成了发送邮件功能！')
         # 跳转登录页面
         return jsonify(code_msg.REGISTER_SUCCESS.put('action', url_for('user.login')))
     ver_code = utils.gen_verify_num()

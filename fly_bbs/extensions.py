@@ -6,11 +6,13 @@ from fly_bbs.models import User
 from flask_uploads import UploadSet, configure_uploads, IMAGES, ALL
 from flask_admin import Admin
 from fly_bbs.admin import admin_view
+from flask_mail import Mail
 
 admin = Admin(name='PyFly 后台管理系统')
 
-
+mail = Mail()
 mongo = PyMongo()
+
 # 创建 LoginManager 对象
 login_manager = LoginManager()
 # 配置作为登录页的视图函数
@@ -27,6 +29,7 @@ def load_user(user_id):
     return User(u)
 
 def init_extensions(app):
+    mail.init_app(app)
     mongo.init_app(app)
     # 在 Flask 应用里初始化
     login_manager.init_app(app)
