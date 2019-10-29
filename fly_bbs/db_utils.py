@@ -54,3 +54,8 @@ def get_list(collection_name, sort_by=None, filter1=None, size=None):
         result = result.limit(size)
     result = list(result)
     return result
+
+
+def find_one(collection_name, filter1=None):
+    _process_filter(filter1)
+    return mongo.db[collection_name].find_one(filter1)

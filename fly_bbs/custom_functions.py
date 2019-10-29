@@ -1,4 +1,4 @@
-from .db_utils import get_list, get_option, get_page
+from .db_utils import get_list, get_option, get_page, find_one
 from datetime import datetime, timedelta
 
 def utc2local(utc_st):
@@ -27,4 +27,5 @@ def init_func(app):
     app.add_template_global(get_list, 'get_list')
     app.add_template_global(datetime.now, 'now')
     app.add_template_global(date_cal, 'date_cal')
+    app.add_template_global(find_one, 'mongo_find_one')
     app.add_template_filter(mongo_date_str, 'mongo_date_str')

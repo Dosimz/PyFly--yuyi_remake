@@ -90,3 +90,18 @@ def add(post_id=None):
             posts = mongo.db.posts.find_one_or_404({'_id': post_id})
         title = '发帖' if post_id is None else '编辑帖子'
         return render_template('jie/add.html', page_name='jie', ver_code=ver_code['question'], form=posts_form, is_add=(post_id is None), post=posts, title=title)
+
+
+# 帖子详情页
+@bbs_index.route('/post/<ObjectId:post_id>/')
+@bbs_index.route('/post/<ObjectId:post_id>/page/<int:pn>/')
+def post_detail(post_id, pn=1):
+    post = mongo.db.posts.find_one_or_404({'_id': post_id})
+    # 当有人访问时，帖子浏览量 + 1
+    if post:
+        post['view_count'] = post.get('view_count', 0) + 1
+        mongo.db.posts.save(post)
+    post['user'] = db_utils.find_one('users', {'_id': post['user_id']}) or {}
+    # 获取评论
+    page = db_utils.get_page('comments', pn=pn, size=10, filter1={'post_id': post_id}, sort_by=('is_adopted', -1))
+    return render_template('jie/detail.html', post=post, title=post['title'], page_name='jie', comment_page=page, catalog_id=post['catalog_id'])

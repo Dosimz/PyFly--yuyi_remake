@@ -3,11 +3,11 @@
 
   <div class="layui-container fly-marginTop">
     <div class="fly-panel" pad20 style="padding-top: 5px;">
-      <!--<div class="fly-none"></div>-->
+      <!--<div class="fly-none">没有权限</div>-->
       <div class="layui-form layui-form-pane">
         <div class="layui-tab layui-tab-brief" lay-filter="user">
           <ul class="layui-tab-title">
-            <li class="layui-this">{% if is_add %} 发表新帖 {% else %} 编辑帖子 {% endif %}</li>
+            <li class="layui-this">{% if is_add %}发表新帖 {% else %} 编辑帖子 {% endif %}</li>
           </ul>
           <div class="layui-form layui-tab-content" id="LAY_ucm" style="padding: 20px 0;">
             <div class="layui-tab-item layui-show">
@@ -19,9 +19,10 @@
                     <div class="layui-input-block">
                       <select lay-verify="required" name="catalog_id" {{ 'disabled' if post.is_closed }}>
                         <option></option>
-                        {% for item in get_list('catalogs') %}
+                       {% for item in get_list('catalogs') %}
                           <option value="{{ item._id }}" {{ 'selected' if post and post['catalog_id'] == item._id }}>{{ item.name }}</option>
                         {% endfor %}
+                    
                       </select>
                     </div>
                   </div>
@@ -48,7 +49,7 @@
                         {% for i in range(0, 101, 20) %}
                           <option value="{{ i }}" {{ 'selected' if post and post['reward'] == i }}>{{ i }}</option>
                         {% endfor %}
-                        <input type="hidden" name="reward" value="{{ post['reward'] }}">
+
                       </select>
                     </div>
                     <div class="layui-form-mid layui-word-aux">发表后无法更改悬赏数目</div>
@@ -58,7 +59,7 @@
                   <label for="L_vercode" class="layui-form-label">人类验证</label>
                   <div class="layui-input-inline">
                     <input type="text" id="L_vercode" name="vercode" required lay-verify="required"
-                           placeholder="请回答后面问题" autocomplete="off" class="layui-input" {{ 'disabled' if post.is_closed }}>
+                           placeholder="请回答后面的问题" autocomplete="off" class="layui-input" {{ 'disabled' if post.is_closed }}>
                   </div>
                   <div class="layui-form-mid">
                     <span style="color: #c00;">{{ ver_code }}</span>
@@ -78,12 +79,6 @@
 
 
 {% block other_js %}
-  <script>
-    layui.use('form', function(){
-    var form = layui.form(); 
-    form.render();
-    });
-  </script>
   {% if post['is_closed'] %}
     <script>
         layui.use('layer', function () {
