@@ -6,9 +6,50 @@ from bson import ObjectId
 from fly_bbs import utils,forms, models, db_utils, code_msg
 from flask import Blueprint, render_template, request, jsonify, session, url_for, redirect
 from fly_bbs import models
-from flask_login import login_user, logout_user, login_required
+from flask_login import login_user, logout_user, login_required, current_user
 
 user_view = Blueprint('user', __name__)
+
+
+@user_view.route('/set', methods=['GET', 'POST'])
+@login_required
+def user_set():
+    if request.method == 'POST':
+        include_keys = ['username', 'avatar', 'desc', 'city', 'sex']
+        data = request.values
+        update_data = {}
+        for key in data.keys():
+            if key in include_keys:
+                update_data[key] = data.get(key)
+        mongo.db.users.update({'_id': current_user.user['_id']}, {'$set': update_data})
+        return jsonify('修改成功')
+    return render_template('user/set.html', user_page='set', page_name='user', title='基本设置')
+
+
+@user_view.route('/message')
+@user_view.route('/message/page/<int:pn>')
+@login_required
+def user_message(pn=1):
+    user = current_user.user
+    if user.get('unread', 0) > 0:
+        # 更新未读消息重新为零
+        mongo.db.users.update({'_id': user['_id']}, {'$set': {'unread': 0}})
+    message_page = db_utils.get_page('messages', pn, filter1={'user_id': user['_id']}, sort_by=('_id', -1))
+    return render_template('user/message.html', user_page='message', page_name='user', page=message_page)
+
+
+
+@user_view.route('/message/remove', methods=['POST'])
+@login_required
+def remove_message():
+    user = current_user.user
+    if request.values.get('all') == 'true':
+        mongo.db.messages.delete_many({'user_id': user['_id']})
+    elif request.values.get('id'):
+        msg_id = ObjectId(request.values.get('id'))
+        mongo.db.messages.delete_one({'_id': msg_id})
+    return jsonify(models.BaseResult())
+
 
 
 # 用户 home 界面
@@ -83,4 +124,5 @@ def register():
         return jsonify(code_msg.REGISTER_SUCCESS.put('action', url_for('user.login')))
     ver_code = utils.gen_verify_num()
     return render_template('user/reg.html', ver_code=ver_code['question'], form=user_form)
+
 
