@@ -90,18 +90,19 @@
 <script>
     layui.cache.page = '{{ page_name if page_name else '' }}';
     layui.cache.user = {
-        username: '{{ current_user.user['username'] if current_user.is_authenticated else '??'}}'
+        username: '{{ current_user.user['username'] if current_user.is_authenticated else '游客'}}'
         , uid: '{{ current_user.user['_id'] if current_user.is_authenticated }}'
         , avatar: '{{ current_user.user['avatar'] if current_user.is_authenticated}}'
         , experience: '{{ current_user.user['coin'] if current_user.is_authenticated else '0'}}'
-        , sex: '{{ current_user.user.get('sex', '??') if current_user.is_authenticated else '??'}}'
+        , sex: '{{ current_user.user.get('sex', '未知') if current_user.is_authenticated else '未知'}}'
     };
     layui.config({
         version: "3.0.0"
-        , base: '/static/mods/' //????????????????
+        , base: '/static/mods/' //这里实际使用时，建议改成绝对路径
     }).extend({
         fly: 'index'
     }){% block fly_use %}.use('fly');{% endblock %}
+</script>
 
 {% block other_js %}
 {% endblock %}
