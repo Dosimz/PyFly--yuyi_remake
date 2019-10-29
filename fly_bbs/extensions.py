@@ -4,6 +4,11 @@ from bson import ObjectId
 # 从 models 文件里引入 User 类
 from fly_bbs.models import User
 from flask_uploads import UploadSet, configure_uploads, IMAGES, ALL
+from flask_admin import Admin
+from fly_bbs.admin import admin_view
+
+admin = Admin(name='PyFly 后台管理系统')
+
 
 mongo = PyMongo()
 # 创建 LoginManager 对象
@@ -27,4 +32,17 @@ def init_extensions(app):
     login_manager.init_app(app)
     # 获取配置信息并存储在 app 上
     configure_uploads(app, upload_photos)
+    # 将 admin 对象注册到 app 上
+    admin.init_app(app)
 
+    with app.app_context():
+        # 添加flask-admin视图
+        admin.add_view(admin_view.UsersModelView(mongo.db['users'], '用户管理'))
+        admin.add_view(admin_view.CatalogsModelView(mongo.db['catalogs'], '栏目管理', category='内容管理'))
+        admin.add_view(admin_view.PostsModelView(mongo.db['posts'], '帖子管理', category='内容管理'))
+        admin.add_view(admin_view.PassagewaysModelView(mongo.db['passageways'], '温馨通道', category='推广管理'))
+        admin.add_view(admin_view.FriendLinksModelView(mongo.db['friend_links'], '友链管理', category='推广管理'))
+        admin.add_view(admin_view.PagesModelView(mongo.db['pages'], '页面管理', category='推广管理'))
+        admin.add_view(admin_view.FooterLinksModelView(mongo.db['footer_links'], '底部链接', category='推广管理'))
+        admin.add_view(admin_view.AdsModelView(mongo.db['ads'], '广告管理', category='推广管理'))
+        admin.add_view(admin_view.OptionsModelView(mongo.db['options'], '系统设置'))
