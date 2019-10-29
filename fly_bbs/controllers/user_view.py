@@ -11,6 +11,25 @@ from flask_login import login_user, logout_user, login_required, current_user
 user_view = Blueprint('user', __name__)
 
 
+@user_view.route('/repass', methods=['POST'])
+def user_repass():
+    # 未登录用户跳转到登录页面
+    if not current_user.is_authenticated:
+        return redirect(url_for('user.login'))
+    pwd_form = forms.ChangePassWordForm()
+    if not pwd_form.validate():
+        return jsonify(models.R.fail(code_msg.PARAM_ERROR.get_msg(), str(pwd_form.errors)))
+    nowpassword = pwd_form.nowpassword.data
+    password = pwd_form.password.data
+    user = current_user.user
+    # 验证输入密码是否正确
+    if not models.User.validate_login(user['password'], nowpassword):
+        raise models.GlobalApiException(code_msg.PASSWORD_ERROR)
+    # 更新密码
+    mongo.db.users.update({'_id': user['_id']}, {'$set': {'password': generate_password_hash(password)}})
+    return jsonify(models.R.ok())
+
+
 @user_view.route('/set', methods=['GET', 'POST'])
 @login_required
 def user_set():

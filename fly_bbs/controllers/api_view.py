@@ -7,12 +7,39 @@ from bson.objectid import ObjectId
 # from bson.json_util import dumps
 from datetime import datetime
 import random
+from flask_uploads import UploadNotAllowed
+from fly_bbs.extensions import upload_photos
 
 api_view = Blueprint("api", __name__, url_prefix="", template_folder="templates")
 
+
+
+@api_view.route('/upload/<string:name>')
+@api_view.route('/upload', methods=['POST'])
+def upload(name=None):
+    if request.method == 'POST':
+        if not current_user.is_authenticated:
+            return jsonify(code_msg.USER_UN_LOGIN)
+        # ‘smfile’ 对应的值就是我们上传的文件
+        file = request.files['smfile']
+        if not file:
+            return jsonify(code_msg.FILE_EMPTY)
+        try:
+            filename = upload_photos.save(file)
+        except UploadNotAllowed:
+            return jsonify(code_msg.UPLOAD_UN_ALLOWED)
+        # 因为存储在帖子内容里，所以用个相对路径，方便数据转移
+        file_url = '/api/upload/' + filename
+        result = models.R(data={'url': file_url}).put('code', 0)
+        return jsonify(result)
+    # 访问上传文件时
+    if not name:
+        abort(404)
+    return redirect(upload_photos.url(name))
+
+
 @api_view.route('/post/delete/<ObjectId:post_id>', methods=['POST'])
 @login_required
-
 def post_delete(post_id):
     post = mongo.db.posts.find_one_or_404({'_id': ObjectId(post_id)})
     # 只有帖子的发布者和管理员可以删除帖子
